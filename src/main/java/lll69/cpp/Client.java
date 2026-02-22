@@ -42,7 +42,7 @@ public class Client {
     }
 
     @JSExport
-    public static JsclMathEngine getMathEngine() throws ParseException {
+    public static JsclMathEngine getMathEngine() {
         return engine;
     }
 

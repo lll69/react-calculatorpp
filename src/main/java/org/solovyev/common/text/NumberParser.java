@@ -22,6 +22,8 @@
 
 package org.solovyev.common.text;
 
+import lll69.cpp.CDouble;
+import lll69.cpp.CFloat;
 import org.solovyev.android.Check;
 
 import javax.annotation.Nonnull;
@@ -64,11 +66,11 @@ public class NumberParser<N extends Number> implements Parser<N> {
             if (this.clazz.equals(Integer.class)) {
                 result = (N) Integer.valueOf(value);
             } else if (this.clazz.equals(Float.class)) {
-                result = (N) Float.valueOf(value);
+                result = (N) CFloat.valueOf(value);
             } else if (this.clazz.equals(Long.class)) {
                 result = (N) Long.valueOf(value);
             } else if (this.clazz.equals(Double.class)) {
-                result = (N) Double.valueOf(value);
+                result = (N) CDouble.valueOf(value);
             } else {
                 throw new UnsupportedOperationException(this.clazz + " is not supported!");
             }

@@ -159,12 +159,13 @@ public class JsclMathEngine extends org.solovyev.android.calculator.Engine imple
 
     @Nonnull
     public String format(double value, @Nonnull NumeralBase nb) {
-        if (Double.isInfinite(value)) {
-            return formatInfinity(value);
-        }
+        // isInfinite(Double.NaN) in TeaVM returns true
         if (Double.isNaN(value)) {
             // return "NaN"
             return String.valueOf(value);
+        }
+        if (Double.isInfinite(value)) {
+            return formatInfinity(value);
         }
         if (nb == NumeralBase.dec) {
             if (value == 0d) {

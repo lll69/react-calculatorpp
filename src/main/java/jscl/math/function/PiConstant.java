@@ -2,6 +2,7 @@ package jscl.math.function;
 
 import jscl.AngleUnit;
 import jscl.JsclMathEngine;
+import lll69.cpp.CDouble;
 
 /**
  * User: serso
@@ -19,7 +20,7 @@ public class PiConstant extends ExtendedConstant {
         Double result = null;
 
         try {
-            result = AngleUnit.rad.transform(JsclMathEngine.getInstance().getAngleUnits(), Double.valueOf(getValue()));
+            result = AngleUnit.rad.transform(JsclMathEngine.getInstance().getAngleUnits(), CDouble.parseDouble(getValue()));
         } catch (NumberFormatException e) {
             // do nothing - string is not a double
         }

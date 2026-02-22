@@ -3,6 +3,7 @@ package org.solovyev.android.calculator.variables;
 import com.google.common.base.Strings;
 import jscl.math.function.Constant;
 import jscl.math.function.IConstant;
+import lll69.cpp.CDouble;
 import org.solovyev.common.math.MathEntity;
 
 import javax.annotation.Nonnull;
@@ -53,7 +54,7 @@ class JsclConstant implements IConstant {
         }
         if (!Strings.isNullOrEmpty(variable.value)) {
             try {
-                doubleValue = Double.valueOf(variable.value);
+                doubleValue = CDouble.valueOf(variable.value);
             } catch (NumberFormatException e) {
                 // do nothing - string is not a double
             }

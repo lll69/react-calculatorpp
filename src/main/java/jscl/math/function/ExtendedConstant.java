@@ -1,5 +1,6 @@
 package jscl.math.function;
 
+import lll69.cpp.CDouble;
 import org.solovyev.common.math.MathEntity;
 
 import javax.annotation.Nonnull;
@@ -144,7 +145,7 @@ public class ExtendedConstant implements Comparable<ExtendedConstant>, IConstant
 
         if (value != null) {
             try {
-                result = Double.valueOf(value);
+                result = CDouble.valueOf(value);
             } catch (NumberFormatException e) {
                 // do nothing - string is not a double
             }

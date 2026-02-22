@@ -1,6 +1,7 @@
 package jscl;
 
 import jscl.math.JsclInteger;
+import lll69.cpp.CDouble;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,7 +21,7 @@ public enum NumeralBase {
         @Nonnull
         @Override
         public Double toDouble(@Nonnull String doubleString) {
-            return Double.valueOf(doubleString);
+            return CDouble.valueOf(doubleString);
         }
 
         @Nonnull
