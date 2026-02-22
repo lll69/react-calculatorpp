@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { styled, SxProps } from "@mui/material";
 import { CalculatorProps } from "./CalculatorCommon";
 import { AddButton, BracketButton, Button0, Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8, Button9, ClearButton, DivButton, EqualButton, EraseButton, FavoriteButton, FunButton, HistoryButton, LeftButton, MemoryButton, MulButton, PercentButton, PointButton, RightButton, SubButton, VarButton } from "./CalculatorButtons";
@@ -26,7 +27,7 @@ const keyGridSx: SxProps = {
     backgroundColor: "normalButton",
 }
 
-export default function CalculatorPortrait(props: CalculatorProps) {
+export default memo((props: CalculatorProps) => {
     return (
         <RootGrid>
             {props.editor}
@@ -77,4 +78,4 @@ export default function CalculatorPortrait(props: CalculatorProps) {
             </KeyGrid>
         </RootGrid>
     );
-}
+});

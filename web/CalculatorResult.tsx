@@ -1,4 +1,4 @@
-import { Ref, useMemo } from "react";
+import { memo, Ref, useMemo } from "react";
 import { SxProps } from "@mui/material";
 import { FilledTextArea } from "./CalculatorStyled";
 
@@ -19,7 +19,7 @@ const textSx: SxProps = {
     textAlign: "right",
 }
 
-export default function CalculatorResult(props: CalculatorResultProps) {
+export default memo((props: CalculatorResultProps) => {
     return (
         <FilledTextArea
             sx={textSx}
@@ -29,4 +29,4 @@ export default function CalculatorResult(props: CalculatorResultProps) {
             defaultValue={props.defaultValue}
             value={props.value} />
     );
-}
+});

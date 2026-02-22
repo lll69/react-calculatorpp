@@ -1,5 +1,5 @@
 import { ButtonBase, styled } from "@mui/material";
-import { PointerEvent, ReactElement, useCallback, useMemo, useRef } from "react";
+import { memo, PointerEvent, ReactElement, useCallback, useMemo, useRef } from "react";
 
 const DEFAULT_FONT_SIZE = 32;
 const TOUCH_SLOP = 15;
@@ -101,7 +101,7 @@ const PaddingText = styled("div")({
     padding: "4px",
 });
 
-export default function DragButton(props: DragButtonProps) {
+export default memo((props: DragButtonProps) => {
     const longPressTimeout = useRef<any>(-1);
     const longPressDelay = useRef<number>(0);
     const pressX = useRef<number>(0);
@@ -241,4 +241,4 @@ export default function DragButton(props: DragButtonProps) {
             ) : null}
         </TouchButton>
     );
-}
+});

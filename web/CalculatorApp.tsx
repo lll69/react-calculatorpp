@@ -1,4 +1,4 @@
-import { createElement, Dispatch, MutableRefObject, ReactElement, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createElement, Dispatch, memo, MutableRefObject, ReactElement, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sprintf } from "sprintf-js";
 import { AppBar, Box, Button, Container, createTheme, CssBaseline, Fab, IconButton, List, ListItem, ListItemButton, ListItemText, styled, ThemeProvider, Toolbar, Typography, useMediaQuery } from "@mui/material";
 import { teal } from "@mui/material/colors";
@@ -147,7 +147,7 @@ const useCalculatorSize: (() => [number, number, boolean, Dispatch<SetStateActio
     return [buttonSize, fontSize, landscape, setContainer];
 };
 
-const AppWizard = ({ buttonSize, fontSize, setPage }: {
+const AppWizard = memo(({ buttonSize, fontSize, setPage }: {
     buttonSize: number, fontSize: number, setPage: (page: Page) => void
 }) => {
     const [wizardState, setWizardState] = useState<WizardState>(WizardState.CENTER);
@@ -191,9 +191,9 @@ const AppWizard = ({ buttonSize, fontSize, setPage }: {
             </InlineDiv>
         </CenterContainer>
     );
-};
+});
 
-const CalculatorHistory = ({ historyItems, enterHistory, clearHistory, exit }: {
+const CalculatorHistory = memo(({ historyItems, enterHistory, clearHistory, exit }: {
     historyItems: HistoryItem[], enterHistory: (item: HistoryItem) => void, clearHistory: () => void, exit: () => void
 }) => {
     const reversedHistoryItems = useMemo(() => [...historyItems].reverse(), [historyItems]);
@@ -236,9 +236,9 @@ const CalculatorHistory = ({ historyItems, enterHistory, clearHistory, exit }: {
             </BottomFab>
         </>
     );
-};
+});
 
-const Calculator = ({ landscape, fontSize, workerState, workerMessageRef, historyItems, page, setPage }:
+const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, historyItems, page, setPage }:
     {
         landscape: boolean, fontSize: number, workerState: WorkerState,
         workerMessageRef: MutableRefObject<((e: MessageEvent<WorkerResult>) => void) | undefined>,
@@ -614,9 +614,9 @@ const Calculator = ({ landscape, fontSize, workerState, workerMessageRef, histor
     }
 
     return createElement(landscape ? CalculatorLandscape : CalculatorPortrait, calculatorProps);
-};
+});
 
-export default function CalculatorApp() {
+export default memo(() => {
     const [currentPage, setCurrentPage] = useState<Page>(Page.WIZARD);
     const darkMode = useMediaQuery("(prefers-color-scheme:dark)");
     const theme = darkMode ? themeDark : themeLight;
@@ -654,4 +654,4 @@ export default function CalculatorApp() {
             <FilledBox ref={setContainer} sx={bgSx}>{component}</FilledBox>
         </ThemeProvider>
     );
-}
+});

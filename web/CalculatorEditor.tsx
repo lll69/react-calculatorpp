@@ -1,4 +1,4 @@
-import { FocusEventHandler, FormEventHandler, MouseEvent, Ref, useCallback, useState } from "react";
+import { FocusEventHandler, FormEventHandler, memo, MouseEvent, Ref, useCallback, useState } from "react";
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, PopoverOrigin, styled, SxProps } from "@mui/material";
 import { KeyboardArrowLeft, Launch, MoreVert } from "@mui/icons-material";
 import { StyledDiv, FilledTextArea } from "./CalculatorStyled";
@@ -52,7 +52,7 @@ const anchorTR: PopoverOrigin = {
     horizontal: "right",
 };
 
-export default function CalculatorEditor(props: CalculatorEditorProps) {
+export default memo((props: CalculatorEditorProps) => {
     const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
     const [anglesAnchor, setAnglesAnchor] = useState<HTMLElement | null>(null);
     const [radixAnchor, setRadixAnchor] = useState<HTMLElement | null>(null);
@@ -158,4 +158,4 @@ export default function CalculatorEditor(props: CalculatorEditorProps) {
             </MenuContainer>
         </StyledDiv>
     )
-}
+});

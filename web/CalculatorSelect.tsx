@@ -1,8 +1,8 @@
+import { memo, useCallback, useMemo, useState } from "react";
+import { ArrowBack } from "@mui/icons-material";
 import { AppBar, Container, IconButton, List, ListItem, ListItemButton, ListItemText, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import { bgSx, ScrollableFilledBox } from "./CalculatorStyled";
 import { msgs, S } from "./CalculatorL10n";
-import { ArrowBack } from "@mui/icons-material";
-import { useCallback, useMemo, useState } from "react";
 
 const VARIABLES = {
     "π": S.c_var_description_pi,
@@ -157,6 +157,12 @@ const FUNCTIONS_OTHER = [
     "∏",
 ];
 
+const wrapStyle = {
+    style: {
+        whiteSpace: "pre-line",
+    },
+};
+
 const FUNCTION_CATEGORIES = {
     [S.c_fun_category_common]: FUNCTIONS_COMMON,
     [S.c_fun_category_trig]: FUNCTIONS_TRIG,
@@ -179,7 +185,7 @@ const FUNCTION_CATEGORY_ARRAY = [
 
 let functionPage = 0;
 
-export function CalculatorVariableSelect({ onVar, exit }: { onVar: (variable: string) => void, exit: () => void }) {
+export const CalculatorVariableSelect = memo(({ onVar, exit }: { onVar: (variable: string) => void, exit: () => void }) => {
     return (
         <>
             <AppBar>
@@ -203,7 +209,9 @@ export function CalculatorVariableSelect({ onVar, exit }: { onVar: (variable: st
                         {Object.keys(VARIABLES).map(name => (
                             <ListItem key={name} disablePadding>
                                 <ListItemButton onClick={useCallback(() => onVar(name), [onVar])}>
-                                    <ListItemText primary={name + " = " + VARIABLE_VALUES[name]} secondary={msgs[VARIABLES[name]]} />
+                                    <ListItemText
+                                        primary={name + " = " + VARIABLE_VALUES[name]}
+                                        secondary={msgs[VARIABLES[name]]} />
                                 </ListItemButton>
                             </ListItem>
                         ))}
@@ -212,9 +220,9 @@ export function CalculatorVariableSelect({ onVar, exit }: { onVar: (variable: st
             </ScrollableFilledBox>
         </>
     )
-};
+});
 
-export function CalculatorFunctionSelect({ onFun, exit }: { onFun: (fun: string) => void, exit: () => void }) {
+export const CalculatorFunctionSelect = memo(({ onFun, exit }: { onFun: (fun: string) => void, exit: () => void }) => {
     const [currentPage, setCurrentPage] = useState(functionPage);
     const onFunMap = useMemo(() => ({}), []);
     const mapOnFun = (fun: string) => {
@@ -264,7 +272,8 @@ export function CalculatorFunctionSelect({ onFun, exit }: { onFun: (fun: string)
                                 <ListItemButton onClick={mapOnFun(fun)}>
                                     <ListItemText
                                         primary={fun + (FUNCTION_ARGS[fun] === undefined ? "(x)" : FUNCTION_ARGS[fun])}
-                                        secondary={FUNCTION_DESC[fun] ? msgs[FUNCTION_DESC[fun]] : null} />
+                                        secondary={FUNCTION_DESC[fun] ? msgs[FUNCTION_DESC[fun]] : null}
+                                        secondaryTypographyProps={wrapStyle} />
                                 </ListItemButton>
                             </ListItem>
                         ))}
@@ -273,4 +282,4 @@ export function CalculatorFunctionSelect({ onFun, exit }: { onFun: (fun: string)
             </ScrollableFilledBox>
         </>
     )
-};
+});
