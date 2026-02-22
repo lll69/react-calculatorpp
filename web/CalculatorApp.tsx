@@ -319,32 +319,34 @@ const Calculator = ({ landscape, fontSize, workerState, workerMessageRef, histor
             case RequestType.EVALUATE_OR_SIMPLIFY:
             case RequestType.EVALUATE:
             case RequestType.SIMPLIFY:
-                workerBusy.current = false;
-                lastCalculateType.current = result.type;
-                const equalChar = (result.success && ((result as EvaluateOrSimplifyResult).resultType || result.type) === RequestType.SIMPLIFY) ? "≡" : "=";
-                if (result.success) {
-                    setResultNotReady(false);
-                    setNeedReplaceResult(false);
-                    setResult(result.result);
-                    addHistoryItem([result.uid, result.expr, equalChar, result.result, result.expr.length, false])
-                } else {
-                    setResultNotReady(true);
-                    setNeedReplaceResult(true);
-                    const error: ParseException | string = (result as SimplifyResultError).simplifyError || (result as EvaluateResultError).evaluateError;
-                    let formattedError: string;
-                    let errorPos = result.expr.length;
-                    if (typeof error === "string") {
-                        formattedError = String(error);
+                if (result.uid === calcUid.current) {
+                    workerBusy.current = false;
+                    lastCalculateType.current = result.type;
+                    const equalChar = (result.success && ((result as EvaluateOrSimplifyResult).resultType || result.type) === RequestType.SIMPLIFY) ? "≡" : "=";
+                    if (result.success) {
+                        setResultNotReady(false);
+                        setNeedReplaceResult(false);
+                        setResult(result.result);
+                        addHistoryItem([result.uid, result.expr, equalChar, result.result, result.expr.length, false])
                     } else {
-                        try {
-                            formattedError = sprintf(jsclMsgs[error.messageCode], ...error.params);
-                            errorPos = Number(error.position);
-                        } catch (ignored) {
+                        setResultNotReady(true);
+                        setNeedReplaceResult(true);
+                        const error: ParseException | string = (result as SimplifyResultError).simplifyError || (result as EvaluateResultError).evaluateError;
+                        let formattedError: string;
+                        let errorPos = result.expr.length;
+                        if (typeof error === "string") {
                             formattedError = String(error);
+                        } else {
+                            try {
+                                formattedError = sprintf(jsclMsgs[error.messageCode], ...error.params);
+                                errorPos = Number(error.position);
+                            } catch (ignored) {
+                                formattedError = String(error);
+                            }
                         }
+                        setResult(formattedError);
+                        addHistoryItem([result.uid, result.expr, equalChar, formattedError, errorPos, true]);
                     }
-                    setResult(formattedError);
-                    addHistoryItem([result.uid, result.expr, equalChar, formattedError, errorPos, false]);
                 }
                 break;
         }
@@ -493,6 +495,7 @@ const Calculator = ({ landscape, fontSize, workerState, workerMessageRef, histor
     const simplify = useCallback(() => startCalculation(RequestType.SIMPLIFY, CalcHistoryOption.REPLACE_HISTORY), [startCalculation]);
 
     const enterHistory = useCallback((item: HistoryItem) => {
+        calcUid.current = (calcUid.current + 1) & 0xffffffff;
         textAreaValueForRender.current = item[1];
         if (textAreaRef.current) textAreaRef.current.value = textAreaValueForRender.current;
         lastCursorPos.current = item[4] + 1;
