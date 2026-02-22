@@ -28,7 +28,7 @@ export function useWorker(
         async function loadWorker() {
             if (USE_INLINED_WORKER_CODE) {
                 try {
-                    const workerCode = 'INLINED_WORKER_CODE';
+                    const workerCode = "```&INLINED_WORKER_CODE&```";
                     workerJs.current = workerCode;
                     reInitWorker();
                 } catch (e) {

@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-dev": "npx webpack --mode=development",
-    "build": "npx webpack"
+    "build": "npx webpack",
+    "build-bundle": "npx webpack && npx tsx make_bundle.ts"
   },
   "author": "lll69",
   "license": "Apache-2.0",

@@ -4,6 +4,7 @@ import { KeyboardArrowLeft, Launch, MoreVert } from "@mui/icons-material";
 import { StyledDiv, FilledTextArea } from "./CalculatorStyled";
 import { msgs, S } from "./CalculatorL10n";
 import { AngleUnit, NumeralBase } from "./CalculatorJscl";
+import { GITHUB_URL } from "./build_config";
 
 interface CalculatorEditorProps {
     readonly?: boolean;
@@ -18,7 +19,6 @@ interface CalculatorEditorProps {
     setAngleUnit: (unit: AngleUnit) => void;
     setNumeralBase: (base: NumeralBase) => void;
     openHistoryPage: () => void;
-    onAbout: () => void;
 }
 
 const parentSx: SxProps = {
@@ -123,7 +123,7 @@ export default function CalculatorEditor(props: CalculatorEditorProps) {
                     <MenuItem onClick={openAnglesMenu}><b>{msgs[S.cpp_angles]}</b>{": "}{mapAngles(props.angleUnit)}</MenuItem>
                     <MenuItem onClick={openRadixMenu}><b>{msgs[S.cpp_radix]}</b>{": "}{mapRadix(props.numeralBase)}</MenuItem>
                     <MenuItem onClick={props.openHistoryPage}>{msgs[S.c_history]}</MenuItem>
-                    <MenuItem onClick={props.onAbout}>{msgs[S.cpp_about]}{" "}<Launch /></MenuItem>
+                    <MenuItem component="a" href={GITHUB_URL}>{msgs[S.cpp_about]}{" "}<Launch /></MenuItem>
                 </Menu>
                 <Menu
                     anchorEl={anglesAnchor}

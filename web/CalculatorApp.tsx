@@ -564,8 +564,7 @@ const Calculator = ({ landscape, fontSize, workerState, workerMessageRef, histor
                 numeralBase={numeralBase}
                 setAngleUnit={setAngleUnit}
                 setNumeralBase={setNumeralBase}
-                openHistoryPage={useCallback(() => setPage(Page.HISTORY), [setPage])}
-                onAbout={aboutClick} />
+                openHistoryPage={useCallback(() => setPage(Page.HISTORY), [setPage])} />
         ),
         result: (
             <CalculatorResult
