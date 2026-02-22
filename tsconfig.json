@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "allowJs": false,
+        "strictNullChecks": true,
+        "target": "es2020",
+        "jsx": "react-jsx",
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
+    },
+    "include": [
+        "web/**/*"
+    ]
+}

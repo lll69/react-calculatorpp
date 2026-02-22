@@ -1,0 +1,5 @@
+{
+    "name": "jscl",
+    "main": "classes.js",
+    "types": "classes.d.ts"
+}
