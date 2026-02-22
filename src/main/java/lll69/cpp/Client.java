@@ -7,6 +7,7 @@ import jscl.math.function.CustomFunction;
 import jscl.math.function.FunctionsRegistry;
 import jscl.text.ParseException;
 import org.solovyev.android.calculator.ToJsclTextProcessor;
+import org.solovyev.common.msg.Message;
 import org.teavm.jso.JSExceptions;
 import org.teavm.jso.JSExport;
 import org.teavm.jso.JSExportClasses;
@@ -49,37 +50,63 @@ public class Client {
     @JSExport
     public static boolean isParseException(JSObject obj) {
         Throwable th = JSExceptions.getJavaException(obj);
-        return th instanceof ParseException;
+        return th instanceof ParseException || th instanceof org.solovyev.android.calculator.ParseException;
     }
 
     @JSExport
     public static String getErrorMessage(JSObject obj) {
         Throwable th = JSExceptions.getJavaException(obj);
-        return th.toString();
+        try {
+            return th.toString();
+        } catch (Throwable ignored) {
+            return th.getClass().getName();
+        }
     }
 
     @JSExport
     public static int pePosition(JSObject obj) {
-        ParseException pe = (ParseException) JSExceptions.getJavaException(obj);
-        return pe.getPosition();
+        Throwable th = JSExceptions.getJavaException(obj);
+        if (th instanceof ParseException) {
+            return ((ParseException) th).getPosition();
+        }
+        if (th instanceof org.solovyev.android.calculator.ParseException) {
+            Integer position = ((org.solovyev.android.calculator.ParseException) th).getPosition();
+            return position == null ? 0 : position;
+        }
+        throw new ClassCastException();
     }
 
     @JSExport
     public static String peExpression(JSObject obj) {
-        ParseException pe = (ParseException) JSExceptions.getJavaException(obj);
-        return pe.getExpression();
+        Throwable th = JSExceptions.getJavaException(obj);
+        if (th instanceof ParseException) {
+            return ((ParseException) th).getExpression();
+        }
+        if (th instanceof org.solovyev.android.calculator.ParseException) {
+            return ((org.solovyev.android.calculator.ParseException) th).getExpression();
+        }
+        throw new ClassCastException();
     }
 
     @JSExport
     public static String peMessageCode(JSObject obj) {
-        ParseException pe = (ParseException) JSExceptions.getJavaException(obj);
-        return pe.getMessageCode();
+        Throwable th = JSExceptions.getJavaException(obj);
+        if (th instanceof ParseException) {
+            return ((ParseException) th).getMessageCode();
+        }
+        if (th instanceof org.solovyev.android.calculator.ParseException) {
+            return "osac_" + ((org.solovyev.android.calculator.ParseException) th).getMessageCode();
+        }
+        throw new ClassCastException();
     }
 
     @JSExport
     public static JSArray<JSObject> peParams(JSObject obj) {
-        ParseException pe = (ParseException) JSExceptions.getJavaException(obj);
-        List<Object> list = pe.getParameters();
+        Throwable th = JSExceptions.getJavaException(obj);
+        if (!(th instanceof Message)) {
+            throw new ClassCastException();
+        }
+        List<Object> list = ((Message) JSExceptions.getJavaException(obj)).getParameters();
         JSArray<JSObject> result = new JSArray<>(list.size());
         for (int i = 0, len = list.size(); i < len; i++) {
             Object object = list.get(i);

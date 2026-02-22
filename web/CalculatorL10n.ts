@@ -96,6 +96,8 @@ const JSCL_MSG_DEFAULT = {
     msg_23: "Complex number computation in non-RAD mode can lead to unexpected results\!",
     msg_24: "Integration in non-RAD mode can lead to unexpected results\!",
     msg_25: "Differentiation in non-RAD mode can lead to unexpected results\!",
+    osac_msg_5: "No parameters are specified for function\: %1$s",
+    osac_msg_6: "Infinite loop is detected in expression",
 }
 
 const JSCL_MSG_ZH_CN = {
@@ -125,6 +127,8 @@ const JSCL_MSG_ZH_CN = {
     msg_23: "在非弧度制下进行复数计算可能得到意外结果！",
     msg_24: "在非弧度制下进行积分计算可能得到意外结果！",
     msg_25: "在非弧度制下进行微分计算可能得到意外结果！",
+    osac_msg_5: "未指定函数参数：%1$s",
+    osac_msg_6: "表达式中包含无限循环",
 }
 
 const UI_MSG_DEFAULT = {
