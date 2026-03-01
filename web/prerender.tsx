@@ -14,7 +14,7 @@ function renderCalculatorApp() {
         <html>
             <head>
                 <meta httpEquiv="content-type" content="text/html; charset=utf-8" />
-                <title>Calculator++</title>
+                <title>Calculator++ Web</title>
                 <meta name="viewport" content="width=device-width" />
                 <style>{"body{background-color:#f5f5f5}@media(prefers-color-scheme:dark){body{background-color:#101010}}html,body{margin:0;width:100%;height:100%}#root{width:100%;height:100%}"}</style>
             </head>
@@ -32,7 +32,7 @@ function renderCalculatorApp() {
             </body>
         </html>
     );
-    result.push(["calc.html", html]);
+    result.push(["index.html", html]);
 }
 
 function main() {
