@@ -10,6 +10,9 @@ export const ScrollableFilledBox = styled(Box)({
     height: "100%",
     overflowY: "auto",
 });
+export const InlineDiv = styled("div")({
+    display: "inline-block",
+});
 export const bgSx = {
     bgcolor: "background.default",
 };

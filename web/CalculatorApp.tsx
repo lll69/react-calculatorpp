@@ -13,12 +13,14 @@ import { jsclMsgs, msgs, S } from "./CalculatorL10n";
 import { WorkerState, useWorker } from "./CalculatorWorker";
 import DragButton from "./DragButton";
 import { EvaluateOrSimplifyResult, EvaluateResultError, RequestType, SimplifyResultError, WorkerRequest, WorkerResult } from "./worker_types";
-import { bgSx, ScrollableFilledBox } from "./CalculatorStyled";
+import { bgSx, InlineDiv, ScrollableFilledBox } from "./CalculatorStyled";
 import { CalculatorFunctionSelect, CalculatorVariableSelect } from "./CalculatorSelect";
 import { GITHUB_URL } from "./build_config";
+import CalculatorIntro from "./CalculatorIntro";
 
 const DEFAULT_FONT_SIZE = 32;
 const enum Page {
+    INTRO,
     WIZARD,
     MAIN,
     HISTORY,
@@ -98,10 +100,6 @@ const FilledBox = styled(Box)({
 
 const CenterContainer = styled(Container)({
     textAlign: "center",
-});
-
-const InlineDiv = styled("div")({
-    display: "inline-block",
 });
 
 const BottomFab = styled(Fab)({
@@ -617,7 +615,7 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
 });
 
 export default memo(() => {
-    const [currentPage, setCurrentPage] = useState<Page>(Page.WIZARD);
+    const [currentPage, setCurrentPage] = useState<Page>(Page.INTRO);
     const darkMode = useMediaQuery("(prefers-color-scheme:dark)");
     const theme = darkMode ? themeDark : themeLight;
     const [buttonSize, fontSize, landscape, setContainer] = useCalculatorSize();
@@ -625,9 +623,13 @@ export default memo(() => {
     const onWorkerErrorRef = useRef<((e: ErrorEvent) => void) | undefined>(undefined);
     const workerState = useWorker(onWorkerMessageRef, onWorkerErrorRef);
     const historyItems: HistoryItem[] = useMemo(() => [], []);
+    const openWizard = useCallback(() => setCurrentPage(Page.WIZARD), []);
 
     let component: ReactElement | undefined;
     switch (currentPage) {
+        case Page.INTRO:
+            component = <CalculatorIntro exit={openWizard} />
+            break;
         case Page.WIZARD:
             component = <AppWizard
                 buttonSize={buttonSize}

@@ -1,5 +1,10 @@
 export const enum S {
+    app_name,
     cpp_about,
+    cpp_wizard_next,
+    c_first_start_text_1,
+    c_first_start_text_2,
+    c_wizard_text,
     cpp_wizard_finish,
     cpp_wizard_dragbutton_description,
     cpp_wizard_dragbutton_action_center,
@@ -132,7 +137,12 @@ const JSCL_MSG_ZH_CN = {
 }
 
 const UI_MSG_DEFAULT = {
+    [S.app_name]: "Calculator++",
     [S.cpp_about]: "About",
+    [S.cpp_wizard_next]: "Next",
+    [S.c_first_start_text_1]: "Thank you for choosing Calculator++!",
+    [S.c_first_start_text_2]: "Calculator++ is a powerful tool for making everyday calculations.",
+    [S.c_wizard_text]: "<p>Are you looking for an efficient and easy-to-use calculator?<br>Do you want to solve both simple and complex problems?<br>Try Calculator++, a multipurpose calculator app with slick and intuitive user interface!</p><h2>★ Save your time!</h2><ul><li>Access additional features from the main screen of the app using gestures. For example, to use «%» slide button «/» up</li><li>You don't need to press «=» anymore - result is calculated automatically</li><li>Copy with a single button press</li><li>App supports both portrait and landscape screen orientations</li></ul><h2>★ Calculate percentages, square roots, powers, trigonometric functions!</h2><p>Calculator has a big variety of built-in functions</p><h2>★ Use powerful mathematical capabilities of the app:</h2><ul><li>Do calculations with variables and constants</li><li>Use built-in functions</li><li>Integrate and differentiate</li><li>Do calculations with fractions and simplify expressions</li><li>Do calculations with complex numbers</li></ul><h2>★ Open source!</h2><p>This project is licensed under <a href=\"https://www.apache.org/licenses/LICENSE-2.0\" target=\"_blank\">Apache License 2.0</a>.</p>",
     [S.cpp_wizard_finish]: "Done",
     [S.cpp_wizard_dragbutton_description]: "Swipe button provides fast access to the secondary functions",
     [S.cpp_wizard_dragbutton_action_center]: "Tap the button below once to use 9",
@@ -203,7 +213,12 @@ const UI_MSG_DEFAULT = {
 }
 
 const UI_MSG_ZH_CN = {
+    [S.app_name]: "Calculator++",
     [S.cpp_about]: "关于",
+    [S.cpp_wizard_next]: "继续",
+    [S.c_first_start_text_1]: "感谢您选择Calculator++！",
+    [S.c_first_start_text_2]: "Calculator++ 是处理日常计算的强大工具。",
+    [S.c_wizard_text]: "<p>您是否在寻找一个高效且易于使用的计算器？<br>需要处理简单到复杂的各类计算问题？<br>试试 Calculator++，这是一款多功能计算器应用，具有流畅直观的用户界面！</p><h2>★ 节省时间！</h2><ul><li>通过手势从应用主屏幕访问附加功能。例如，上滑 / 按钮即可输入 %</li><li>无需再按 = 键：结果会自动计算</li><li>一键实现复制操作</li><li>支持竖屏和横屏显示模式</li></ul><h2>★ 计算百分比、平方根、幂、三角函数！</h2><p>Calculator++ 拥有多种内置函数</p><h2>★ 使用强大的数学功能：</h2><ul><li>使用变量和常量进行计算</li><li>使用内置函数</li><li>积分和求导</li><li>使用分数进行计算并简化表达式</li><li>计算复数</li></ul><h2>★ 开源！</h2><p>本项目在 <a href=\"https://www.apache.org/licenses/LICENSE-2.0\" target=\"_blank\">Apache License 2.0</a> 下开源</p>",
     [S.cpp_wizard_finish]: "完成",
     [S.cpp_wizard_dragbutton_description]: "滑动输入可快速调用次要功能",
     [S.cpp_wizard_dragbutton_action_center]: "点击按钮输入 9",

@@ -22,6 +22,7 @@
     "@mui/x-data-grid": "^5.17.26",
     "@mui/x-date-pickers": "^5.0.20",
     "@thi.ng/random": "^4.1.10",
+    "html-react-parser": "^5.2.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sprintf-js": "^1.1.3",
