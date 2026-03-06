@@ -1,4 +1,4 @@
-import { FocusEventHandler, FormEventHandler, memo, MouseEvent, Ref, useCallback, useState } from "react";
+import { FocusEventHandler, FormEventHandler, memo, Ref, useCallback, useRef, useState } from "react";
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, PopoverOrigin, styled, SxProps } from "@mui/material";
 import { KeyboardArrowLeft, MoreVert } from "@mui/icons-material";
 import { StyledDiv, FilledTextArea } from "./CalculatorStyled";
@@ -59,14 +59,18 @@ export default memo((props: CalculatorEditorProps) => {
     const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
     const [anglesAnchor, setAnglesAnchor] = useState<HTMLElement | null>(null);
     const [radixAnchor, setRadixAnchor] = useState<HTMLElement | null>(null);
-    const openMenu = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-        setMenuAnchor(e.currentTarget);
+    const menuButtonRef = useRef<HTMLButtonElement>(null);
+    const openMenu = useCallback(() => {
+        setAnglesAnchor(null);
+        setRadixAnchor(null);
+        setMenuAnchor(menuButtonRef.current);
     }, []);
     const closeMenu = useCallback(() => {
         setMenuAnchor(null);
     }, []);
-    const openAnglesMenu = useCallback((e: MouseEvent<HTMLLIElement>) => {
-        setAnglesAnchor(e.currentTarget);
+    const openAnglesMenu = useCallback(() => {
+        setMenuAnchor(null);
+        setAnglesAnchor(menuButtonRef.current);
     }, []);
     const closeAnglesMenu = useCallback(() => {
         setAnglesAnchor(null);
@@ -84,8 +88,9 @@ export default memo((props: CalculatorEditorProps) => {
         }
     }, []);
     const wrapAngleClick = (unit: AngleUnit) => useCallback(() => { props.setAngleUnit(unit); closeAnglesMenu(); }, [props.setAngleUnit]);
-    const openRadixMenu = useCallback((e: MouseEvent<HTMLLIElement>) => {
-        setRadixAnchor(e.currentTarget);
+    const openRadixMenu = useCallback(() => {
+        setMenuAnchor(null);
+        setRadixAnchor(menuButtonRef.current);
     }, []);
     const closeRadixMenu = useCallback(() => {
         setRadixAnchor(null);
@@ -106,7 +111,10 @@ export default memo((props: CalculatorEditorProps) => {
         setMenuAnchor(null);
         props.openAbout();
     }, [props.openAbout]);
-    const wrapRadixClick = (base: NumeralBase) => useCallback(() => { props.setNumeralBase(base); closeRadixMenu(); }, [props.setNumeralBase]);
+    const wrapRadixClick = (base: NumeralBase) => useCallback(() => {
+        props.setNumeralBase(base);
+        closeRadixMenu();
+    }, [props.setNumeralBase]);
     return (
         <StyledDiv sx={parentSx}>
             <FilledTextArea
@@ -120,7 +128,7 @@ export default memo((props: CalculatorEditorProps) => {
                 onFocus={props.textOnFocus}
                 onInput={props.textOnInput} />
             <MenuContainer>
-                <IconButton onClick={openMenu}><MoreVert /></IconButton>
+                <IconButton onClick={openMenu} ref={menuButtonRef}><MoreVert /></IconButton>
                 <Menu
                     anchorEl={menuAnchor}
                     anchorOrigin={anchorTR}
@@ -138,7 +146,7 @@ export default memo((props: CalculatorEditorProps) => {
                     transformOrigin={anchorTR}
                     open={anglesAnchor !== null}
                     onClose={closeAnglesMenu}>
-                    <MenuItem onClick={closeAnglesMenu}>
+                    <MenuItem onClick={openMenu}>
                         <ListItemIcon><KeyboardArrowLeft fontSize="small" /></ListItemIcon>
                         <ListItemText>{msgs[S.cpp_angles]}</ListItemText>
                     </MenuItem>
@@ -153,7 +161,7 @@ export default memo((props: CalculatorEditorProps) => {
                     transformOrigin={anchorTR}
                     open={radixAnchor !== null}
                     onClose={closeRadixMenu}>
-                    <MenuItem onClick={closeRadixMenu}>
+                    <MenuItem onClick={openMenu}>
                         <ListItemIcon><KeyboardArrowLeft fontSize="small" /></ListItemIcon>
                         <ListItemText>{msgs[S.cpp_radix]}</ListItemText>
                     </MenuItem>
