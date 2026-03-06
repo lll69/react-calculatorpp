@@ -72,6 +72,8 @@ export const enum S {
     c_pf_description_double_factorial,
     c_pf_description_percent,
     c_pf_description_degree,
+    ok,
+    cancel,
 }
 
 const JSCL_MSG_DEFAULT = {
@@ -209,7 +211,9 @@ const UI_MSG_DEFAULT = {
     [S.c_pf_description_factorial]: "Gives the factorial of the previous expression",
     [S.c_pf_description_double_factorial]: "Gives the double factorial of the previous expression",
     [S.c_pf_description_percent]: "Gives the percent value of the expression before.\nExamples:\n100 + 50% = 150\n100 * 50% = 50\n100 + 100 * 50% * 50% = 125",
-    [S.c_pf_description_degree]: "Converts degrees to radians.\nExamples:\n268° = 4.67748\n30.21° = 0.52726"
+    [S.c_pf_description_degree]: "Converts degrees to radians.\nExamples:\n268° = 4.67748\n30.21° = 0.52726",
+    [S.ok]: "OK",
+    [S.cancel]: "Cancel",
 }
 
 const UI_MSG_ZH_CN = {
@@ -285,7 +289,9 @@ const UI_MSG_ZH_CN = {
     [S.c_pf_description_factorial]: "计算表达式的阶乘",
     [S.c_pf_description_double_factorial]: "计算表达式的二次阶乘",
     [S.c_pf_description_percent]: "计算表达式的百分比。\n例如：\n100 + 50% = 150\n100 * 50% = 50\n100 + 100 * 50% * 50% = 125",
-    [S.c_pf_description_degree]: "将度转换为弧度。\n例如：\n268° = 4.67748\n30.21° = 0.52726"
+    [S.c_pf_description_degree]: "将度转换为弧度。\n例如：\n268° = 4.67748\n30.21° = 0.52726",
+    [S.ok]: "确定",
+    [S.cancel]: "取消",
 }
 
 const JSCL_LOCALE_MAP = {

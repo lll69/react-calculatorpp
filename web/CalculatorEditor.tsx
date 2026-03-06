@@ -1,10 +1,9 @@
 import { FocusEventHandler, FormEventHandler, memo, MouseEvent, Ref, useCallback, useState } from "react";
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, PopoverOrigin, styled, SxProps } from "@mui/material";
-import { KeyboardArrowLeft, Launch, MoreVert } from "@mui/icons-material";
+import { KeyboardArrowLeft, MoreVert } from "@mui/icons-material";
 import { StyledDiv, FilledTextArea } from "./CalculatorStyled";
 import { msgs, S } from "./CalculatorL10n";
 import { AngleUnit, NumeralBase } from "./CalculatorJscl";
-import { GITHUB_URL } from "./build_config";
 
 interface CalculatorEditorProps {
     readonly?: boolean;
@@ -19,6 +18,7 @@ interface CalculatorEditorProps {
     setAngleUnit: (unit: AngleUnit) => void;
     setNumeralBase: (base: NumeralBase) => void;
     openHistoryPage: () => void;
+    openAbout: () => void;
 }
 
 const parentSx: SxProps = {
@@ -99,6 +99,10 @@ export default memo((props: CalculatorEditorProps) => {
                 return msgs[S.cpp_hex];
         }
     }, []);
+    const openAbout = useCallback(() => {
+        setMenuAnchor(null);
+        props.openAbout();
+    }, [props.openAbout]);
     const wrapRadixClick = (base: NumeralBase) => useCallback(() => { props.setNumeralBase(base); closeRadixMenu(); }, [props.setNumeralBase]);
     return (
         <StyledDiv sx={parentSx}>
@@ -123,7 +127,7 @@ export default memo((props: CalculatorEditorProps) => {
                     <MenuItem onClick={openAnglesMenu}><b>{msgs[S.cpp_angles]}</b>{": "}{mapAngles(props.angleUnit)}</MenuItem>
                     <MenuItem onClick={openRadixMenu}><b>{msgs[S.cpp_radix]}</b>{": "}{mapRadix(props.numeralBase)}</MenuItem>
                     <MenuItem onClick={props.openHistoryPage}>{msgs[S.c_history]}</MenuItem>
-                    <MenuItem component="a" href={GITHUB_URL}>{msgs[S.cpp_about]}{" "}<Launch /></MenuItem>
+                    <MenuItem onClick={openAbout}>{msgs[S.cpp_about]}</MenuItem>
                 </Menu>
                 <Menu
                     anchorEl={anglesAnchor}

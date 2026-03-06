@@ -1,6 +1,6 @@
 import { createElement, Dispatch, memo, MutableRefObject, ReactElement, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sprintf } from "sprintf-js";
-import { AppBar, Box, Button, Container, createTheme, CssBaseline, Fab, IconButton, List, ListItem, ListItemButton, ListItemText, styled, ThemeProvider, Toolbar, Typography, useMediaQuery } from "@mui/material";
+import { AppBar, Box, Button, Container, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, IconButton, List, ListItem, ListItemButton, ListItemText, styled, ThemeProvider, Toolbar, Typography, useMediaQuery } from "@mui/material";
 import { teal } from "@mui/material/colors";
 import { ArrowBack, Delete } from "@mui/icons-material";
 import CalculatorPortrait from "./CalculatorPortrait";
@@ -15,7 +15,6 @@ import DragButton from "./DragButton";
 import { EvaluateOrSimplifyResult, EvaluateResultError, RequestType, SimplifyResultError, WorkerRequest, WorkerResult } from "./worker_types";
 import { bgSx, InlineDiv, ScrollableFilledBox } from "./CalculatorStyled";
 import { CalculatorFunctionSelect, CalculatorVariableSelect } from "./CalculatorSelect";
-import { GITHUB_URL } from "./build_config";
 import CalculatorIntro from "./CalculatorIntro";
 
 const DEFAULT_FONT_SIZE = 32;
@@ -23,6 +22,7 @@ const enum Page {
     INTRO,
     WIZARD,
     MAIN,
+    ABOUT_DIALOG,
     HISTORY,
     SELECT_VARIABLE,
     SELECT_FUNCTION,
@@ -523,7 +523,7 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     }, []);
 
     const aboutClick = useCallback(() => {
-        open(GITHUB_URL, "_blank");
+        setPage(Page.ABOUT_DIALOG);
     }, []);
 
     const onSelectVar = useCallback((variable: string) => {
@@ -565,7 +565,8 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
                 numeralBase={numeralBase}
                 setAngleUnit={setAngleUnit}
                 setNumeralBase={setNumeralBase}
-                openHistoryPage={useCallback(() => setPage(Page.HISTORY), [setPage])} />
+                openHistoryPage={useCallback(() => setPage(Page.HISTORY), [setPage])}
+                openAbout={aboutClick} />
         ),
         result: (
             <CalculatorResult
@@ -614,6 +615,30 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     return createElement(landscape ? CalculatorLandscape : CalculatorPortrait, calculatorProps);
 });
 
+const AboutDialog = memo(({ show, exit }: { show: boolean, exit: () => void }) => {
+    return (
+        <Dialog
+            open={show}
+            onClose={exit}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description">
+            <DialogTitle id="alert-dialog-title">
+                {msgs[S.cpp_about]}
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    Calculator++ Web v1.0.0
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={exit} autoFocus>
+                    {msgs[S.ok]}
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+});
+
 export default memo(() => {
     const [currentPage, setCurrentPage] = useState<Page>(Page.INTRO);
     const darkMode = useMediaQuery("(prefers-color-scheme:dark)");
@@ -624,6 +649,7 @@ export default memo(() => {
     const workerState = useWorker(onWorkerMessageRef, onWorkerErrorRef);
     const historyItems: HistoryItem[] = useMemo(() => [], []);
     const openWizard = useCallback(() => setCurrentPage(Page.WIZARD), []);
+    const openCalculator = useCallback(() => setCurrentPage(Page.MAIN), []);
 
     let component: ReactElement | undefined;
     switch (currentPage) {
@@ -640,6 +666,7 @@ export default memo(() => {
         case Page.HISTORY:
         case Page.SELECT_VARIABLE:
         case Page.SELECT_FUNCTION:
+        case Page.ABOUT_DIALOG:
             component = <Calculator
                 landscape={landscape}
                 fontSize={fontSize}
@@ -654,6 +681,7 @@ export default memo(() => {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <FilledBox ref={setContainer} sx={bgSx}>{component}</FilledBox>
+            <AboutDialog show={currentPage === Page.ABOUT_DIALOG} exit={openCalculator} />;
         </ThemeProvider>
     );
 });
