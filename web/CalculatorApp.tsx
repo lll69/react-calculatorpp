@@ -43,6 +43,12 @@ type HistoryItem = [uid: number, expr: string, equalChar: string, result: string
 const floor = Math.floor;
 const min = Math.min;
 const max = Math.max;
+const invokeDelayed: (<TArgs extends any[]>(
+    callback: (...args: TArgs) => void,
+    delay?: number,
+    ...args: [void] extends TArgs ? Partial<TArgs> : TArgs
+) => number) = setTimeout;
+const clearDelayed = clearTimeout;
 
 const copyText = (str: string) => {
     const D = document, element = D.createElement("input");
@@ -264,6 +270,8 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     const historyPtr = useRef<number>(-1);
     const variableToEnter = useRef<string | null>(null);
     const functionToEnter = useRef<string | null>(null);
+    const pendingWorkerRequest = useRef<WorkerRequest | null>(null);
+    const workerDelayTimeout = useRef<number | null>(null);
 
     const setTextRef = useCallback((textArea: HTMLTextAreaElement | null) => {
         const isAttach = textAreaRef.current === null && textArea !== null;
@@ -312,6 +320,17 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     }, []);
 
     workerMessageRef.current = useCallback((e: MessageEvent<WorkerResult>) => {
+        if (workerDelayTimeout.current !== null) {
+            clearDelayed(workerDelayTimeout.current);
+            workerDelayTimeout.current = null;
+            if (pendingWorkerRequest.current !== null) {
+                const request = pendingWorkerRequest.current;
+                pendingWorkerRequest.current = null;
+                workerBusy.current = true;
+                workerRef.current!.postMessage(request);
+                return;
+            }
+        }
         const result = e.data;
         switch (result.type) {
             case RequestType.EVALUATE_OR_SIMPLIFY:
@@ -350,14 +369,25 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
         }
     }, []);
 
+    const delayedReInitWorker = useCallback(() => {
+        if (workerDelayTimeout.current !== null) {
+            clearDelayed(workerDelayTimeout.current);
+            workerDelayTimeout.current = null;
+            reInitWorker();
+            workerBusy.current = false;
+            if (pendingWorkerRequest.current !== null) {
+                const request = pendingWorkerRequest.current;
+                pendingWorkerRequest.current = null;
+                workerBusy.current = true;
+                workerRef.current!.postMessage(request);
+            }
+        }
+    }, []);
+
     const startCalculation = useCallback((type: RequestType, historyOption?: CalcHistoryOption) => {
         const textArea = textAreaRef.current;
         const expr = textArea ? textArea.value : textAreaValueForRender.current;
         textAreaValueForRender.current = expr;
-        if (workerBusy.current) {
-            reInitWorker();
-            workerBusy.current = false;
-        }
         calcWithHistory.current = (historyOption === undefined) ? CalcHistoryOption.ADD_HISTORY : historyOption;
         if (expr) {
             if (!resultNotReady && lastCalculateType.current !== null && type === RequestType.EVALUATE) {
@@ -377,8 +407,15 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
                 angleUnit: angleUnit,
                 numeralBase: numeralBase,
             };
-            workerBusy.current = true;
-            workerRef.current!.postMessage(request);
+            if (workerBusy.current) {
+                pendingWorkerRequest.current = request;
+                if (workerDelayTimeout.current === null) {
+                    workerDelayTimeout.current = invokeDelayed(delayedReInitWorker, 500);
+                }
+            } else {
+                workerBusy.current = true;
+                workerRef.current!.postMessage(request);
+            }
         } else {
             setResultNotReady(false);
             setNeedReplaceResult(false);
