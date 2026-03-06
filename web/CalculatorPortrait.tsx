@@ -15,6 +15,8 @@ const PartialGrid = styled("div")({
     display: "grid",
     gridTemplateRows: "1fr",
     gridTemplateColumns: "1fr 4fr",
+    minHeight: "0",
+    overflowY: "hidden",
 });
 
 const KeyGrid = styled("div")({

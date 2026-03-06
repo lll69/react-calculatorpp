@@ -17,6 +17,7 @@ const textSx: SxProps = {
     resize: "none",
     border: "none",
     textAlign: "right",
+    minHeight: "0",
 }
 
 export default memo((props: CalculatorResultProps) => {

@@ -681,7 +681,7 @@ export default memo(() => {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <FilledBox ref={setContainer} sx={bgSx}>{component}</FilledBox>
-            <AboutDialog show={currentPage === Page.ABOUT_DIALOG} exit={openCalculator} />;
+            <AboutDialog show={currentPage === Page.ABOUT_DIALOG} exit={openCalculator} />
         </ThemeProvider>
     );
 });

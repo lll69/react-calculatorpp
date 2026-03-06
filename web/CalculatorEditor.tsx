@@ -26,6 +26,8 @@ const parentSx: SxProps = {
     color: "text.primary",
     position: "relative",
     display: "flex",
+    minHeight: "0",
+    overflowY: "hidden",
 };
 
 const textSx: SxProps = {
@@ -38,6 +40,7 @@ const textSx: SxProps = {
     display: "block",
     width: "100%",
     height: "100%",
+    minHeight: "0",
 };
 
 const MenuContainer = styled("div")({
