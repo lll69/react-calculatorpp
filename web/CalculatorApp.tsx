@@ -1,6 +1,6 @@
 import { createElement, Dispatch, memo, MutableRefObject, ReactElement, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sprintf } from "sprintf-js";
-import { AppBar, Box, Button, Container, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, IconButton, List, ListItem, ListItemButton, ListItemText, styled, ThemeProvider, Toolbar, Typography, useMediaQuery } from "@mui/material";
+import { AppBar, Box, Button, Container, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, IconButton, List, ListItem, ListItemButton, ListItemText, Snackbar, SnackbarOrigin, styled, ThemeProvider, Toolbar, Typography, useMediaQuery } from "@mui/material";
 import { teal } from "@mui/material/colors";
 import { ArrowBack, Delete } from "@mui/icons-material";
 import CalculatorPortrait from "./CalculatorPortrait";
@@ -12,7 +12,7 @@ import { AngleUnit, NumeralBase, ParseException } from "./CalculatorJscl";
 import { jsclMsgs, msgs, S } from "./CalculatorL10n";
 import { WorkerState, useWorker } from "./CalculatorWorker";
 import DragButton from "./DragButton";
-import { EvaluateOrSimplifyResult, EvaluateResultError, RequestType, SimplifyResultError, WorkerRequest, WorkerResult } from "./worker_types";
+import { EvaluateOrSimplifyResult, EvaluateResultError, RequestType, SimplifyResultError, WORKER_VERSION, WorkerRequest, WorkerResult } from "./worker_types";
 import { bgSx, InlineDiv, ScrollableFilledBox } from "./CalculatorStyled";
 import { CalculatorFunctionSelect, CalculatorVariableSelect } from "./CalculatorSelect";
 import CalculatorIntro from "./CalculatorIntro";
@@ -113,6 +113,11 @@ const BottomFab = styled(Fab)({
     bottom: 16,
     right: 16,
 });
+
+const snackbarOrigin: SnackbarOrigin = {
+    horizontal: "center",
+    vertical: "bottom",
+};
 
 const wizardStringMap = {
     [WizardState.CENTER]: S.cpp_wizard_dragbutton_action_center,
@@ -262,7 +267,7 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     const lastCursorRange: { start: number, end: number } = useMemo(() => ({ start: 0, end: 0 }), []);
     const workerBusy = useRef<boolean>(false);
     const calcUid = useRef<number>(0);
-    const [workerRef, workerLoadError, reInitWorker] = workerState;
+    const [workerRef, workerLoadError, reInitWorker, setWorkerError] = workerState;
     const [angleUnit, setAngleUnit] = useState<AngleUnit>(AngleUnit.rad);
     const [numeralBase, setNumeralBase] = useState<NumeralBase>(NumeralBase.dec);
     const lastCalculateType = useRef<RequestType | null>(null);
@@ -272,6 +277,31 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     const functionToEnter = useRef<string | null>(null);
     const pendingWorkerRequest = useRef<WorkerRequest | null>(null);
     const workerDelayTimeout = useRef<number | null>(null);
+    const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+    const snackbarHideTimeout = useRef(-1);
+    const memoryExpr = useRef<[string, AngleUnit, NumeralBase]>(["0", AngleUnit.deg, NumeralBase.dec]);
+
+    const postWorkerMessage = useCallback((msg: WorkerRequest) => {
+        if (workerRef.current) {
+            workerRef.current.postMessage(msg);
+        }
+    }, [workerRef]);
+
+    const postWorkerMessageDelayed = useCallback((msg: WorkerRequest) => {
+        if (workerBusy.current) {
+            pendingWorkerRequest.current = msg;
+            if (workerDelayTimeout.current === null) {
+                workerDelayTimeout.current = invokeDelayed(delayedReInitWorker, 500);
+            }
+        } else {
+            workerBusy.current = true;
+            postWorkerMessage(msg);
+        }
+    }, [workerRef]);
+
+    const nextUid = useCallback(() => {
+        return calcUid.current = (calcUid.current + 1) & 0xffffffff;
+    }, [calcUid]);
 
     const setTextRef = useCallback((textArea: HTMLTextAreaElement | null) => {
         const isAttach = textAreaRef.current === null && textArea !== null;
@@ -319,6 +349,14 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
         historyPtr.current = historyItems.length - 1;
     }, []);
 
+    const closeSnackbar = useCallback(() => setSnackbarMessage(null), []);
+
+    const showSnackbar = useCallback((msg: string) => {
+        clearDelayed(snackbarHideTimeout.current);
+        setSnackbarMessage(msg);
+        snackbarHideTimeout.current = invokeDelayed(closeSnackbar, 2000);
+    }, []);
+
     workerMessageRef.current = useCallback((e: MessageEvent<WorkerResult>) => {
         if (workerDelayTimeout.current !== null) {
             clearDelayed(workerDelayTimeout.current);
@@ -327,12 +365,17 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
                 const request = pendingWorkerRequest.current;
                 pendingWorkerRequest.current = null;
                 workerBusy.current = true;
-                workerRef.current!.postMessage(request);
+                postWorkerMessage(request);
                 return;
             }
         }
         const result = e.data;
         switch (result.type) {
+            case "init":
+                if (result.version !== WORKER_VERSION) {
+                    setWorkerError("Invalid worker version '" + result.version + "'. Try to clear browser cache.");
+                }
+                break;
             case RequestType.EVALUATE_OR_SIMPLIFY:
             case RequestType.EVALUATE:
             case RequestType.SIMPLIFY:
@@ -366,20 +409,45 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
                     }
                 }
                 break;
+            case RequestType.ADD_MEMORY:
+            case RequestType.SUB_MEMORY:
+            case RequestType.CLEAR_MEMORY:
+                if (result.uid === calcUid.current) {
+                    workerBusy.current = false;
+                    if (result.success) {
+                        memoryExpr.current = [result.result, angleUnit, numeralBase];
+                        showSnackbar(result.result);
+                    }
+                }
+                break;
+            case RequestType.GET_MEMORY:
+                if (result.uid === calcUid.current) {
+                    workerBusy.current = false;
+                    if (result.success) {
+                        memoryExpr.current = [result.result, angleUnit, numeralBase];
+                        insertString(result.result);
+                    }
+                }
+                break;
+            default:
+                if (result.uid === calcUid.current) {
+                    workerBusy.current = false;
+                }
+                break;
         }
-    }, []);
+    }, [angleUnit, numeralBase]);
 
     const delayedReInitWorker = useCallback(() => {
         if (workerDelayTimeout.current !== null) {
             clearDelayed(workerDelayTimeout.current);
             workerDelayTimeout.current = null;
-            reInitWorker();
+            reInitWorker(memoryExpr.current);
             workerBusy.current = false;
             if (pendingWorkerRequest.current !== null) {
                 const request = pendingWorkerRequest.current;
                 pendingWorkerRequest.current = null;
                 workerBusy.current = true;
-                workerRef.current!.postMessage(request);
+                postWorkerMessage(request);
             }
         }
     }, []);
@@ -399,23 +467,15 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
             setResultNotReady(true);
             setNeedReplaceResult(false);
             lastCalculateType.current = null;
-            calcUid.current = (calcUid.current + 1) & 0xffffffff;
+            const uid = nextUid();
             const request: WorkerRequest = {
                 type: type,
-                uid: calcUid.current,
+                uid: uid,
                 expr: expr,
                 angleUnit: angleUnit,
                 numeralBase: numeralBase,
             };
-            if (workerBusy.current) {
-                pendingWorkerRequest.current = request;
-                if (workerDelayTimeout.current === null) {
-                    workerDelayTimeout.current = invokeDelayed(delayedReInitWorker, 500);
-                }
-            } else {
-                workerBusy.current = true;
-                workerRef.current!.postMessage(request);
-            }
+            postWorkerMessageDelayed(request);
         } else {
             setResultNotReady(false);
             setNeedReplaceResult(false);
@@ -514,6 +574,7 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
         lastCursorPos.current = textArea.selectionStart = textArea.selectionEnd = 0;
         textArea.focus();
         handleTextChange();
+        postWorkerMessage({ type: RequestType.CLEAR_RESULT, uid: nextUid() });
     }, [handleTextChange]);
 
     const calculate = useCallback(() => {
@@ -530,7 +591,7 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     const simplify = useCallback(() => startCalculation(RequestType.SIMPLIFY, CalcHistoryOption.REPLACE_HISTORY), [startCalculation]);
 
     const enterHistory = useCallback((item: HistoryItem) => {
-        calcUid.current = (calcUid.current + 1) & 0xffffffff;
+        nextUid();
         textAreaValueForRender.current = item[1];
         if (textAreaRef.current) textAreaRef.current.value = textAreaValueForRender.current;
         lastCursorPos.current = item[4] + 1;
@@ -574,6 +635,42 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
     }, []);
 
     const backToCalculator = useCallback(() => setPage(Page.MAIN), []);
+
+    const addMemory = useCallback(() => {
+        postWorkerMessage({
+            type: RequestType.ADD_MEMORY,
+            uid: nextUid(),
+            angleUnit: angleUnit,
+            numeralBase: numeralBase,
+        });
+    }, [angleUnit, numeralBase]);
+
+    const subMemory = useCallback(() => {
+        postWorkerMessage({
+            type: RequestType.SUB_MEMORY,
+            uid: nextUid(),
+            angleUnit: angleUnit,
+            numeralBase: numeralBase,
+        });
+    }, [angleUnit, numeralBase]);
+
+    const clearMemory = useCallback(() => {
+        postWorkerMessageDelayed({
+            type: RequestType.CLEAR_MEMORY,
+            uid: nextUid(),
+            angleUnit: angleUnit,
+            numeralBase: numeralBase,
+        });
+    }, [angleUnit, numeralBase]);
+
+    const enterMemory = useCallback(() => {
+        postWorkerMessageDelayed({
+            type: RequestType.GET_MEMORY,
+            uid: nextUid(),
+            angleUnit: angleUnit,
+            numeralBase: numeralBase,
+        });
+    }, [angleUnit, numeralBase]);
 
     useEffect(() => {
         if (textAreaRef.current && textAreaRef.current.value && lastCalculateType.current) {
@@ -630,6 +727,11 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
         onRedo: redo,
         onChooseVar: useCallback(() => setPage(Page.SELECT_VARIABLE), [setPage]),
         onChooseFun: useCallback(() => setPage(Page.SELECT_FUNCTION), [setPage]),
+        supportMemory: true,
+        onMemoryAdd: addMemory,
+        onMemorySub: subMemory,
+        onMemoryClear: clearMemory,
+        onMemoryRequest: enterMemory,
     };
 
     switch (page) {
@@ -649,7 +751,14 @@ const Calculator = memo(({ landscape, fontSize, workerState, workerMessageRef, h
                 exit={backToCalculator} />;
     }
 
-    return createElement(landscape ? CalculatorLandscape : CalculatorPortrait, calculatorProps);
+    return (<>
+        {createElement(landscape ? CalculatorLandscape : CalculatorPortrait, calculatorProps)}
+        <Snackbar
+            open={snackbarMessage !== null}
+            message={snackbarMessage}
+            onClose={closeSnackbar}
+            anchorOrigin={snackbarOrigin} />
+    </>);
 });
 
 const AboutDialog = memo(({ show, exit }: { show: boolean, exit: () => void }) => {

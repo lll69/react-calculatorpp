@@ -1,13 +1,22 @@
-import { AngleUnit, NumeralBase, ParseException } from "./CalculatorJscl"
+import { AngleUnit, NumeralBase, ParseException } from "./CalculatorJscl";
+
+export const WORKER_VERSION = "2";
 
 export const enum RequestType {
     EVALUATE = "evaluate",
     SIMPLIFY = "simplify",
-    EVALUATE_OR_SIMPLIFY = "evaluate/simplify",
+    EVALUATE_OR_SIMPLIFY = "eval/simp",
+    GET_MEMORY = "getMem",
+    SET_MEMORY = "setMem",
+    ADD_MEMORY = "addMem",
+    SUB_MEMORY = "subMem",
+    CLEAR_MEMORY = "clrMem",
+    CLEAR_RESULT = "clrRes",
 }
 
 export type InitResult = {
     type: "init",
+    version: string,
 }
 
 export type EvaluateOrSimplifyRequest = {
@@ -102,5 +111,142 @@ export type SimplifyResultError = {
 
 export type SimplifyResult = SimplifyResultSuccess | SimplifyResultError;
 
-export type WorkerRequest = EvaluateOrSimplifyRequest | EvaluateRequest | SimplifyRequest;
-export type WorkerResult = InitResult | EvaluateOrSimplifyResult | EvaluateResult | SimplifyResult;
+export type GetMemoryRequest = {
+    type: RequestType.GET_MEMORY,
+    uid: number,
+    angleUnit: AngleUnit,
+    numeralBase: NumeralBase,
+}
+
+export type GetMemoryResultSuccess = {
+    type: RequestType.GET_MEMORY,
+    uid: number,
+    success: true,
+    result: string,
+}
+
+export type GetMemoryResultError = {
+    type: RequestType.GET_MEMORY,
+    uid: number,
+    success: false,
+    error: ParseException | string,
+}
+
+export type GetMemoryResult = GetMemoryResultSuccess | GetMemoryResultError;
+
+export type SetMemoryRequest = {
+    type: RequestType.SET_MEMORY,
+    uid: number,
+    expr: string,
+    angleUnit: AngleUnit,
+    numeralBase: NumeralBase,
+}
+
+export type SetMemoryResultSuccess = {
+    type: RequestType.SET_MEMORY,
+    uid: number,
+    success: true,
+    expr: string,
+    result: string,
+}
+
+export type SetMemoryResultError = {
+    type: RequestType.SET_MEMORY,
+    uid: number,
+    success: false,
+    expr: string,
+    error: ParseException | string,
+}
+
+export type SetMemoryResult = SetMemoryResultSuccess | SetMemoryResultError;
+
+export type AddMemoryRequest = {
+    type: RequestType.ADD_MEMORY,
+    uid: number,
+    angleUnit: AngleUnit,
+    numeralBase: NumeralBase,
+}
+
+export type AddMemoryResultSuccess = {
+    type: RequestType.ADD_MEMORY,
+    uid: number,
+    success: true,
+    result: string,
+}
+
+export type AddMemoryResultError = {
+    type: RequestType.ADD_MEMORY,
+    uid: number,
+    success: false,
+    error: ParseException | string,
+}
+
+export type AddMemoryResult = AddMemoryResultSuccess | AddMemoryResultError;
+
+export type SubMemoryRequest = {
+    type: RequestType.SUB_MEMORY,
+    uid: number,
+    angleUnit: AngleUnit,
+    numeralBase: NumeralBase,
+}
+
+export type SubMemoryResultSuccess = {
+    type: RequestType.SUB_MEMORY,
+    uid: number,
+    success: true,
+    result: string,
+}
+
+export type SubMemoryResultError = {
+    type: RequestType.SUB_MEMORY,
+    uid: number,
+    success: false,
+    error: ParseException | string,
+}
+
+export type SubMemoryResult = SubMemoryResultSuccess | SubMemoryResultError;
+
+export type ClearMemoryRequest = {
+    type: RequestType.CLEAR_MEMORY,
+    uid: number,
+    angleUnit: AngleUnit,
+    numeralBase: NumeralBase, 
+}
+
+export type ClearMemoryResultSuccess = {
+    type: RequestType.CLEAR_MEMORY,
+    uid: number,
+    success: true,
+    result: string,
+}
+
+export type ClearMemoryResultError = {
+    type: RequestType.CLEAR_MEMORY,
+    uid: number,
+    success: false,
+    error: ParseException | string,
+}
+
+export type ClearMemoryResult = ClearMemoryResultSuccess | ClearMemoryResultError;
+
+export type ClearResultRequest = {
+    type: RequestType.CLEAR_RESULT,
+    uid: number,
+}
+
+export type ClearResultResult = {
+    type: RequestType.CLEAR_RESULT,
+    uid: number,
+    success: true,
+}
+
+export type WorkerRequest = EvaluateOrSimplifyRequest
+    | EvaluateRequest | SimplifyRequest
+    | GetMemoryRequest | SetMemoryRequest
+    | AddMemoryRequest | SubMemoryRequest
+    | ClearMemoryRequest | ClearResultRequest;
+export type WorkerResult = InitResult | EvaluateOrSimplifyResult
+    | EvaluateResult | SimplifyResult
+    | GetMemoryResult | SetMemoryResult
+    | AddMemoryResult | SubMemoryResult
+    | ClearMemoryResult | ClearResultResult;

@@ -1,5 +1,5 @@
-import { initJscl, getMathEngine, isParseException, getErrorMessage, pePosition, peExpression, peMessageCode, peParams, evaluate, simplify, elementary, processExpr, setAngleUnits, setNumeralBase } from "./jscl";
-import { RequestType, WorkerRequest, WorkerResult } from "./worker_types";
+import { initJscl, getMathEngine, isParseException, getErrorMessage, pePosition, peExpression, peMessageCode, peParams, evaluate, simplify, elementary, processExpr, setAngleUnits, setNumeralBase, getMemory, addMemory, clearMemory, clearResult, setMemory, subMemory } from "./jscl";
+import { RequestType, WORKER_VERSION, WorkerRequest, WorkerResult } from "./worker_types";
 import { AngleUnit, NumeralBase, ParseException } from "./CalculatorJscl";
 
 interface MathEngine {
@@ -10,6 +10,12 @@ interface MathEngine {
     processExpr(expr: string): string;
     setAngleUnits(unit: AngleUnit): void;
     setNumeralBase(unit: NumeralBase): void;
+    getMemory(): string;
+    setMemory(expr: string): string;
+    addMemory(): string;
+    subMemory(): string;
+    clearMemory(): string;
+    clearResult(): void;
 }
 
 const postWorkerMessage: ((msg: WorkerResult) => void) = postMessage;
@@ -34,37 +40,75 @@ function getEngine(): MathEngine {
         engine: engine,
         evaluate: (expr: string) => {
             try {
-                return evaluate(engine, expr);
+                return evaluate(expr);
             } catch (e) {
                 throw wrapException(e);
             }
         },
         simplify: (expr: string) => {
             try {
-                return simplify(engine, expr);
+                return simplify(expr);
             } catch (e) {
                 throw wrapException(e);
             }
         },
         elementary: (expr: string) => {
             try {
-                return elementary(engine, expr);
+                return elementary(expr);
             } catch (e) {
                 throw wrapException(e);
             }
         },
         processExpr: (expr: string) => {
             try {
-                return processExpr(engine, expr);
+                return processExpr(expr);
             } catch (e) {
                 throw wrapException(e);
             }
         },
+        getMemory: () => {
+            try {
+                return getMemory();
+            } catch (e) {
+                throw wrapException(e);
+            }
+        },
+        setMemory: (expr: string) => {
+            try {
+                return setMemory(expr);
+            } catch (e) {
+                throw wrapException(e);
+            }
+        },
+        addMemory: () => {
+            try {
+                return addMemory();
+            } catch (e) {
+                throw wrapException(e);
+            }
+        },
+        subMemory: () => {
+            try {
+                return subMemory();
+            } catch (e) {
+                throw wrapException(e);
+            }
+        },
+        clearMemory: () => {
+            try {
+                return clearMemory();
+            } catch (e) {
+                throw wrapException(e);
+            }
+        },
+        clearResult: () => {
+            clearResult();
+        },
         setAngleUnits: (unit: AngleUnit) => {
-            setAngleUnits(engine, unit);
+            setAngleUnits(unit);
         },
         setNumeralBase: (base: NumeralBase) => {
-            setNumeralBase(engine, base);
+            setNumeralBase(base);
         },
     }
 }
@@ -162,9 +206,125 @@ onmessage = (event: MessageEvent) => {
             }
             break;
         }
+        case RequestType.GET_MEMORY: {
+            mathEngine.setAngleUnits(request.angleUnit);
+            mathEngine.setNumeralBase(request.numeralBase);
+            try {
+                const result = mathEngine.getMemory();
+                postWorkerMessage({
+                    type: RequestType.GET_MEMORY,
+                    uid: request.uid,
+                    success: true,
+                    result: result,
+                });
+            } catch (error) {
+                postWorkerMessage({
+                    type: RequestType.GET_MEMORY,
+                    uid: request.uid,
+                    success: false,
+                    error: error,
+                });
+            }
+            break;
+        }
+        case RequestType.SET_MEMORY: {
+            mathEngine.setAngleUnits(request.angleUnit);
+            mathEngine.setNumeralBase(request.numeralBase);
+            try {
+                const result = mathEngine.setMemory(request.expr);
+                postWorkerMessage({
+                    type: RequestType.SET_MEMORY,
+                    uid: request.uid,
+                    success: true,
+                    expr: request.expr,
+                    result: result,
+                });
+            } catch (error) {
+                postWorkerMessage({
+                    type: RequestType.SET_MEMORY,
+                    uid: request.uid,
+                    success: false,
+                    expr: request.expr,
+                    error: error,
+                });
+            }
+            break;
+        }
+        case RequestType.ADD_MEMORY: {
+            mathEngine.setAngleUnits(request.angleUnit);
+            mathEngine.setNumeralBase(request.numeralBase);
+            try {
+                const result = mathEngine.addMemory();
+                postWorkerMessage({
+                    type: RequestType.ADD_MEMORY,
+                    uid: request.uid,
+                    success: true,
+                    result: result,
+                });
+            } catch (error) {
+                postWorkerMessage({
+                    type: RequestType.ADD_MEMORY,
+                    uid: request.uid,
+                    success: false,
+                    error: error,
+                });
+            }
+            break;
+        }
+        case RequestType.SUB_MEMORY: {
+            mathEngine.setAngleUnits(request.angleUnit);
+            mathEngine.setNumeralBase(request.numeralBase);
+            try {
+                const result = mathEngine.subMemory();
+                postWorkerMessage({
+                    type: RequestType.SUB_MEMORY,
+                    uid: request.uid,
+                    success: true,
+                    result: result,
+                });
+            } catch (error) {
+                postWorkerMessage({
+                    type: RequestType.SUB_MEMORY,
+                    uid: request.uid,
+                    success: false,
+                    error: error,
+                });
+            }
+            break;
+        }
+        case RequestType.CLEAR_MEMORY: {
+            mathEngine.setAngleUnits(request.angleUnit);
+            mathEngine.setNumeralBase(request.numeralBase);
+            try {
+                const result = mathEngine.clearMemory();
+                postWorkerMessage({
+                    type: RequestType.CLEAR_MEMORY,
+                    uid: request.uid,
+                    success: true,
+                    result: result,
+                });
+            } catch (error) {
+                postWorkerMessage({
+                    type: RequestType.CLEAR_MEMORY,
+                    uid: request.uid,
+                    success: false,
+                    error: error,
+                });
+            }
+            break;
+        }
+        case RequestType.CLEAR_RESULT: {
+            mathEngine.clearResult();
+            postWorkerMessage({
+                type: RequestType.CLEAR_RESULT,
+                uid: request.uid,
+                success: true,
+            });
+            break;
+        }
     }
 };
 
-postWorkerMessage({ type: "init" });
+postWorkerMessage({ type: "init", version: WORKER_VERSION });
 
 export { };

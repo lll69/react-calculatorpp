@@ -1,28 +1,36 @@
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
-import { WorkerResult } from "./worker_types";
+import { RequestType, SetMemoryRequest, WorkerResult } from "./worker_types";
 import { USE_INLINED_WORKER_CODE } from "./build_config";
+import { AngleUnit, NumeralBase } from "./CalculatorJscl";
 
 const createObjectURL = URL.createObjectURL;
 const revokeObjectURL = URL.revokeObjectURL;
 
-export type WorkerState = [MutableRefObject<Worker | null>, any, () => Worker];
+export type WorkerState = [MutableRefObject<Worker | null>, any, (memory?: [string, AngleUnit, NumeralBase]) => Worker, (error: any) => void];
 
 export function useWorker(
     onWorkerMessage: RefObject<((e: MessageEvent<WorkerResult>) => void) | undefined>,
     onWorkerError: RefObject<((e: ErrorEvent) => void) | undefined>
-): [MutableRefObject<Worker | null>, any, () => Worker] {
+): WorkerState {
     const workerJs = useRef<string | null>(null);
     const workerRef = useRef<Worker | null>(null);
     const blobUrl = useRef<string | null>(null);
     const setWorker = useState<Worker | null>(null)[1];
     const [error, setError] = useState<string | null>(null);
 
-    const reInitWorker = () => {
+    const reInitWorker = (memory?: [string, AngleUnit, NumeralBase]) => {
         if (workerRef.current) workerRef.current.terminate();
         if (blobUrl.current) revokeObjectURL(blobUrl.current);
         const newWorker = new Worker(blobUrl.current = createObjectURL(new Blob([workerJs.current!], { type: "text/javascript" })));
         newWorker.onmessage = (e => { if (onWorkerMessage.current) onWorkerMessage.current(e) });
         newWorker.onerror = (e => { if (onWorkerError.current) onWorkerError.current(e) });
+        if (memory) newWorker.postMessage({
+            type: RequestType.SET_MEMORY,
+            uid: -1,
+            expr: memory[0],
+            angleUnit: memory[1],
+            numeralBase: memory[2],
+        } as SetMemoryRequest)
         setWorker(workerRef.current = newWorker);
         return newWorker;
     };
@@ -63,5 +71,6 @@ export function useWorker(
         workerRef,
         error,
         reInitWorker,
+        setError,
     ];
 }

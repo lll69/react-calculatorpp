@@ -3,6 +3,7 @@ package lll69.cpp;
 import jscl.AngleUnit;
 import jscl.JsclMathEngine;
 import jscl.NumeralBase;
+import jscl.math.Generic;
 import jscl.math.function.CustomFunction;
 import jscl.math.function.FunctionsRegistry;
 import jscl.text.ParseException;
@@ -22,6 +23,9 @@ import java.util.List;
 @JSExportClasses({ParseException.class})
 public class Client {
     private static JsclMathEngine engine;
+    private static Generic ZERO;
+    private static Generic lastResult;
+    private static Generic memory;
 
     @JSExport
     public static void initJscl() throws ParseException {
@@ -38,7 +42,9 @@ public class Client {
                 "(x+conjugate(x))/2").create());
         functions.addOrUpdate(new CustomFunction.Builder(true, "im", Collections.singletonList("x"),
                 "(x-conjugate(x))/(2*i)").create());
-        engine.evaluate("1");
+        ZERO = engine.evaluateGeneric("0");
+        ZERO.toString();
+        memory = ZERO;
         Client.engine = engine;
     }
 
@@ -116,34 +122,86 @@ public class Client {
     }
 
     @JSExport
-    public static String evaluate(JsclMathEngine engine, String expr) throws ParseException {
-        return engine.evaluate(expr);
+    public static String evaluate(String expr) throws ParseException {
+        lastResult = null;
+        Generic generic = engine.evaluateGeneric(expr);
+        String result = generic.toString();
+        lastResult = generic;
+        return result;
     }
 
     @JSExport
-    public static String simplify(JsclMathEngine engine, String expr) throws ParseException {
-        return engine.simplify(expr);
+    public static String simplify(String expr) throws ParseException {
+        lastResult = null;
+        Generic generic = engine.simplifyGeneric(expr);
+        String result = generic.toString();
+        lastResult = generic;
+        return result;
     }
 
     @JSExport
-    public static String elementary(JsclMathEngine engine, String expr) throws ParseException {
-        return engine.elementary(expr);
+    public static String elementary(String expr) throws ParseException {
+        lastResult = null;
+        Generic generic = engine.elementaryGeneric(expr);
+        String result = generic.toString();
+        lastResult = generic;
+        return result;
     }
 
     @JSExport
-    public static String processExpr(JsclMathEngine engine, String expr) {
+    public static String getMemory() {
+        return memory.toString();
+    }
+
+    @JSExport
+    public static String setMemory(String expr) throws ParseException {
+        Generic newMemory = memory = engine.simplifyGeneric(expr);
+        return newMemory.toString();
+    }
+
+    @JSExport
+    public static String addMemory() {
+        Generic newMemory = memory;
+        if (lastResult != null) {
+            newMemory = memory = newMemory.add(lastResult).simplify();
+        }
+        return newMemory.toString();
+    }
+
+    @JSExport
+    public static String subMemory() {
+        Generic newMemory = memory;
+        if (lastResult != null) {
+            newMemory = memory = newMemory.subtract(lastResult).simplify();
+        }
+        return newMemory.toString();
+    }
+
+    @JSExport
+    public static String clearMemory() {
+        Generic newMemory = memory = ZERO;
+        return newMemory.toString();
+    }
+
+    @JSExport
+    public static void clearResult() {
+        lastResult = ZERO;
+    }
+
+    @JSExport
+    public static String processExpr(String expr) {
         ToJsclTextProcessor processor = ToJsclTextProcessor.getInstance();
         processor.setEngine(engine);
         return processor.process(expr).value;
     }
 
     @JSExport
-    public static void setAngleUnits(JsclMathEngine engine, String unit) {
+    public static void setAngleUnits(String unit) {
         engine.setAngleUnits(AngleUnit.valueOf(unit));
     }
 
     @JSExport
-    public static void setNumeralBase(JsclMathEngine engine, String base) {
+    public static void setNumeralBase(String base) {
         engine.setNumeralBase(NumeralBase.valueOf(base));
     }
 }
