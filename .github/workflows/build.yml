@@ -27,7 +27,8 @@ jobs:
       - name: Build with Node
         run: |
           npm install
-          npx webpack
+          npx webpack --devtool=source-map
+          npx tsx make_bundle.ts
 
       - name: Deploy to GitHub Pages
         uses: crazy-max/ghaction-github-pages@v4

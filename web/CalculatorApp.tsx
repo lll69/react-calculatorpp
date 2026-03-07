@@ -16,6 +16,7 @@ import { EvaluateOrSimplifyResult, EvaluateResultError, RequestType, SimplifyRes
 import { bgSx, InlineDiv, ScrollableFilledBox } from "./CalculatorStyled";
 import { CalculatorFunctionSelect, CalculatorVariableSelect } from "./CalculatorSelect";
 import CalculatorIntro from "./CalculatorIntro";
+const { floor, min, max } = Math;
 
 const DEFAULT_FONT_SIZE = 32;
 const enum Page {
@@ -40,9 +41,6 @@ const enum CalcHistoryOption {
 }
 type HistoryItem = [uid: number, expr: string, equalChar: string, result: string, pos: number, resultNotReady: boolean];
 
-const floor = Math.floor;
-const min = Math.min;
-const max = Math.max;
 const invokeDelayed: (<TArgs extends any[]>(
     callback: (...args: TArgs) => void,
     delay?: number,

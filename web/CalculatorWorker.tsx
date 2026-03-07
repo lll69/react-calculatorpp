@@ -1,9 +1,7 @@
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { RequestType, SetMemoryRequest, WorkerResult } from "./worker_types";
 import { AngleUnit, NumeralBase } from "./CalculatorJscl";
-
-const createObjectURL = URL.createObjectURL;
-const revokeObjectURL = URL.revokeObjectURL;
+const { createObjectURL, revokeObjectURL } = URL;
 
 export type WorkerState = [MutableRefObject<Worker | null>, any, (memory?: [string, AngleUnit, NumeralBase]) => Worker, (error: any) => void];
 

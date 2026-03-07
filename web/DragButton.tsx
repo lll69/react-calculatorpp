@@ -1,5 +1,6 @@
 import { ButtonBase, styled } from "@mui/material";
 import { memo, PointerEvent, ReactElement, useCallback, useMemo, useRef } from "react";
+const { atan2, max, PI } = Math;
 
 const DEFAULT_FONT_SIZE = 32;
 const TOUCH_SLOP = 15;
@@ -13,9 +14,6 @@ const LONG_PRESS_DELAY_FACTOR = 2 / 3;
 
 const invokeDelayed = setTimeout;
 const clearDelay = clearTimeout;
-const atan2 = Math.atan2;
-const max = Math.max;
-const PI = Math.PI;
 
 export interface DragButtonProps {
     fontSize?: number,
