@@ -771,7 +771,7 @@ const AboutDialog = memo(({ show, exit }: { show: boolean, exit: () => void }) =
             </DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    Calculator++ Web v1.0.0
+                    Calculator++ Web v1.0.1
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
