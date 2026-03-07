@@ -1,6 +1,5 @@
 import { MutableRefObject, RefObject, useEffect, useRef, useState } from "react";
 import { RequestType, SetMemoryRequest, WorkerResult } from "./worker_types";
-import { USE_INLINED_WORKER_CODE } from "./build_config";
 import { AngleUnit, NumeralBase } from "./CalculatorJscl";
 
 const createObjectURL = URL.createObjectURL;
@@ -37,9 +36,9 @@ export function useWorker(
 
     useEffect(() => {
         async function loadWorker() {
-            if (USE_INLINED_WORKER_CODE) {
+            const workerCode = "```&INLINED_WORKER_CODE&```";
+            if (workerCode.charCodeAt(0) !== "`".charCodeAt(0)) {
                 try {
-                    const workerCode = "```&INLINED_WORKER_CODE&```";
                     workerJs.current = workerCode;
                     reInitWorker();
                 } catch (e) {

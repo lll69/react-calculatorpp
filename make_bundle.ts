@@ -1,13 +1,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
-// Change USE_INLINED_WORKER_CODE to true in web/build_config.ts first
+import { gzipSync } from "node:zlib";
 
 const INLINED_REPLACER = "\"```&INLINED_WORKER_CODE&```\"";
 
-let calcHtml = readFileSync("dist/calc.html", { encoding: "utf-8" });
+let calcHtml = readFileSync("dist/index.html", { encoding: "utf-8" });
 let calcJs = readFileSync("dist/calc.js", { encoding: "utf-8" });
 let workerJs = readFileSync("dist/cpp_worker.js", { encoding: "utf-8" });
 if (calcJs.indexOf(INLINED_REPLACER) >= 0) {
-    workerJs = JSON.stringify(workerJs);
+    workerJs = "'" + workerJs.replaceAll("\\", () => "\\\\").replaceAll("'", () => "\\'") + "'";
     calcJs = calcJs.replaceAll("\"```&INLINED_WORKER_CODE&```\"", () => workerJs);
 } else {
     function bytesToBase64(bytes: Uint8Array) {
@@ -21,7 +21,7 @@ if (calcJs.indexOf(INLINED_REPLACER) >= 0) {
 }
 writeFileSync("dist/calc_bundled.js", calcJs, { encoding: "utf-8" });
 calcHtml = calcHtml.replaceAll("<script src=\"calc.js\"></script>", () => ("<script>" + calcJs + "</script>"));
-writeFileSync("dist/calc_bundled.html", calcHtml, { encoding: "utf-8" });
+writeFileSync("dist/calc_bundled.html.gz", gzipSync(calcHtml));
 console.log("Written", calcHtml.length, "chars");
 
 export { };
